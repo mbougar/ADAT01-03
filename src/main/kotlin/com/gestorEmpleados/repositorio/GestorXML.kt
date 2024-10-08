@@ -51,7 +51,7 @@ class GestorXML {
 
         val transformer: Transformer = TransformerFactory.newInstance().newTransformer()
 
-        transformer.setOutputProperty(OutputKeys.INDENT, "no")
+        transformer.setOutputProperty(OutputKeys.INDENT, "yes")
         transformer.transform(source, result)
     }
 
