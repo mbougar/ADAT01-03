@@ -12,21 +12,32 @@ class GestorCSV {
 
     fun leerArchivoTexto(rutaFichero: Path): List<Empleado> {
         val listaEmpleados = mutableListOf<Empleado>()
+        val br: BufferedReader
 
-        val br: BufferedReader = Files.newBufferedReader(rutaFichero)
+        try {
+            br = Files.newBufferedReader(rutaFichero)
+        } catch (_: java.io.IOException) {
+            // Si levanta excepción durante la generación del bufferedReader devolvera una lista vacía ya que no lee nada
+            return listaEmpleados
+        }
+
         var firstLineRead = false
 
         br.use {
             it.forEachLine { linea ->
                 if (firstLineRead) {
                     val columnas = linea.split(",")
-                    val empleado = Empleado(
-                        id = columnas[0].toInt(),
-                        apellido = columnas[1],
-                        departamento = columnas[2],
-                        salario = columnas[3].toDouble()
-                    )
-                    listaEmpleados.add(empleado)
+                    try {
+                        val empleado = Empleado(
+                            id = columnas[0].toInt(),
+                            apellido = columnas[1],
+                            departamento = columnas[2],
+                            salario = columnas[3].toDouble()
+                        )
+                        listaEmpleados.add(empleado)
+                    } catch (_: NumberFormatException) {
+
+                    }
                 } else {
                     firstLineRead = true
                 }

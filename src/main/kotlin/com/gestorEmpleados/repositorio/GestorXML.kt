@@ -3,6 +3,7 @@ package com.gestorEmpleados.repositorio
 import com.gestorEmpleados.modelo.Empleado
 import org.w3c.dom.*
 import java.nio.file.Path
+import javax.xml.parsers.DocumentBuilder
 import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.transform.OutputKeys
 import javax.xml.transform.Source
@@ -18,10 +19,19 @@ class GestorXML {
 
     fun crearXML(rutaFichero: Path, empleados: List<Empleado>) {
 
-        val dbf = DocumentBuilderFactory.newInstance()
-        val builder = dbf.newDocumentBuilder()
-        val imp: DOMImplementation = builder.domImplementation
-        val document: Document = imp.createDocument(null, "empleados", null)
+        val dbf: DocumentBuilderFactory
+        val builder: DocumentBuilder
+        val imp: DOMImplementation
+        val document: Document
+
+        try {
+            dbf = DocumentBuilderFactory.newInstance()
+            builder = dbf.newDocumentBuilder()
+            imp = builder.domImplementation
+            document = imp.createDocument(null, "empleados", null)
+        } catch (_: Exception) {
+            return
+        }
 
         for (empleado in empleados) {
             val empleadoNodo: Element = document.createElement("empleado")
@@ -46,8 +56,13 @@ class GestorXML {
         }
 
         val source: Source = DOMSource(document)
+        val result: StreamResult
 
-        val result = StreamResult(rutaFichero.toFile())
+        try {
+            result = StreamResult(rutaFichero.toFile())
+        } catch (_: Exception) {
+            return
+        }
 
         val transformer: Transformer = TransformerFactory.newInstance().newTransformer()
 
@@ -56,10 +71,21 @@ class GestorXML {
     }
 
     fun modificarNodoXML(idEmpleado: Int, nuevoSalario: Double, rutaFichero: Path) {
-        val dbf = DocumentBuilderFactory.newInstance()
-        val builder = dbf.newDocumentBuilder()
-        val document = builder.parse(rutaFichero.toFile())
-        val root: Element = document.documentElement
+
+        val dbf: DocumentBuilderFactory
+        val builder: DocumentBuilder
+        val document: Document
+        val root: Element
+
+        try {
+            dbf = DocumentBuilderFactory.newInstance()
+            builder = dbf.newDocumentBuilder()
+            document = builder.parse(rutaFichero.toFile())
+            root = document.documentElement
+        } catch (_: Exception) {
+            return
+        }
+
         root.normalize()
 
         val empleados = document.getElementsByTagName("empleado")
@@ -86,16 +112,23 @@ class GestorXML {
 
     fun leerXML(rutaFichero: Path): List<Empleado> {
 
-        val dbf = DocumentBuilderFactory.newInstance()
-        val builder = dbf.newDocumentBuilder()
-        val document = builder.parse(rutaFichero.toFile())
+        val dbf: DocumentBuilderFactory
+        val builder: DocumentBuilder
+        val document: Document
+        val empleados = mutableListOf<Empleado>()
+
+        try {
+            dbf = DocumentBuilderFactory.newInstance()
+            builder = dbf.newDocumentBuilder()
+            document = builder.parse(rutaFichero.toFile())
+        } catch (_: Exception) {
+            return empleados
+        }
 
         val root: Element = document.documentElement
         root.normalize()
 
         val listaNodos: NodeList = root.getElementsByTagName("empleado")
-
-        val empleados = mutableListOf<Empleado>()
 
         for (i in 0..< listaNodos.length) {
 
